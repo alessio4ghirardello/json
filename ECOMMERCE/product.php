@@ -4,7 +4,7 @@ class Product
 {
     private $id;
     private $nome;
-    private $prezzo;
+    private int $prezzo;
     private $marca;
 
 
@@ -102,10 +102,10 @@ class Product
 
     public function Delete()
     {
-        if(!$this->getId())
+        /*if(!$this->getId())
         {
             return false;
-        }
+        }*/
         $id = $this->getId();
         $pdo = self::Connect();
         $stmt = $pdo->prepare("DELETE FROM ecommerce.products WHERE id = :id");
