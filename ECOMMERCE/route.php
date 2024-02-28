@@ -60,13 +60,13 @@ addRoute('GET', '/products', function () {//metodo get senza id
     header("HTTP/1.1 200 OK"); //se è tutto ok torna 200
     header("Content-Type: application/vnd.api+json");//si inserisce il content type json
 
-    $response = ['data' => $data]; //si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
-    echo json_encode($response, JSON_PRETTY_PRINT); //si esegue l'encode della risposta e con json pretty print lo formatta in modo leggibile
+    $risposta_json = ['data' => $data]; //si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
+    echo json_encode($risposta_json, JSON_PRETTY_PRINT); //si esegue l'encode della risposta e con json pretty print lo formatta in modo leggibile
 });
 
 addRoute('GET', '/products/(\d+)', function ($matches) {//funzione get con id
-    $parts = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($parts); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
     header("Location: /products/" . $id); //reinderizza il client al seguente url ovvero alla tabella product , al prodotto con l'id specificato
     header('HTTP/1.1 200 OK');//risposta 200 ok
@@ -84,10 +84,10 @@ addRoute('GET', '/products/(\d+)', function ($matches) {//funzione get con id
                     'prezzo' => $product->getPrezzo()
                 ]
         ];
-        $response = ['data' => $data];
+        $risposta_json = ['data' => $data];
 
 
-        echo json_encode($response, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
+        echo json_encode($risposta_json, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
     } else {
 
         http_response_code(404); //errore 404 se non trova il prodotto
@@ -96,25 +96,25 @@ addRoute('GET', '/products/(\d+)', function ($matches) {//funzione get con id
 });
 
 addRoute('POST', '/products', function () { //chiamata post
-    $jsonData = json_decode(file_get_contents('php://input'), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array jsondata 
-    if ($jsonData && isset($jsonData['data']['attributes'])) { //controlla se sono settati tutti i parametri
-        $attributes = $jsonData['data']['attributes']; //si assegna alla variabile attributes gli attributi di data e attributes
-        $newProduct = Product::Create($attributes); //creazione nuovo prodotto con i parametri di attributes
-        if ($newProduct) { //se esiste preparo la risposta json
-            $responseData = [
+    $dati_json = json_decode(file_get_contents('php://input'), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array jsondata 
+    if ($dati_json && isset($dati_json['data']['attributes'])) { //controlla se sono settati tutti i parametri
+        $attributi = $dati_json['data']['attributes']; //si assegna alla variabile attributes gli attributi di data e attributes
+        $nuovo_prodotto = Product::Create($attributi); //creazione nuovo prodotto con i parametri di attributes
+        if ($nuovo_prodotto) { //se esiste preparo la risposta json
+            $data = [
                 'data' => [
                     'type' => 'products',
-                    'id' => $newProduct->getId(),
+                    'id' => $nuovo_prodotto->getId(),
                     'attributes' => [
-                        'nome' => $newProduct->getNome(),
-                        'marca' => $newProduct->getMarca(),
-                        'prezzo' => $newProduct->getPrezzo()
+                        'nome' => $nuovo_prodotto->getNome(),
+                        'marca' => $nuovo_prodotto->getMarca(),
+                        'prezzo' => $nuovo_prodotto->getPrezzo()
                     ]
                 ]
             ];
             header("HTTP/1.1 201 Created"); //201 se creato
             header("Content-Type: application/vnd.api+json");//si inserisce il content type json
-            echo json_encode($responseData, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
+            echo json_encode($data, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
         } else {
             http_response_code(500); //errore internal server error 500 
             echo json_encode(['error' => 'Errore durante la creazione del prodotto']); //scritta di errore
@@ -126,27 +126,27 @@ addRoute('POST', '/products', function () { //chiamata post
 });
 
 addRoute('PATCH', '/products/(\d+)', function ($matches) { //funzione patch di modifica
-    $parts = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($parts); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
-    $patchData = json_decode(file_get_contents("php://input"), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array patchdata 
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
+    $dati_json = json_decode(file_get_contents("php://input"), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array patchdata 
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
     try { //se esistono patch data e products , si la fa query di update e si prepara la risposta json
-        if ($patchData && $product) {
-            $updatedProduct = $product->Update($patchData["data"]["attributes"]);
+        if ($dati_json && $product) {
+            $prodotto_aggiornato = $product->Update($dati_json["data"]["attributes"]);
             $data = [
                 'type' => 'products', 
-                'id' => $updatedProduct->getId(), 
+                'id' => $prodotto_aggiornato->getId(), 
                 'attributes' => [
-                    'nome' => $updatedProduct->getNome(), 
-                    'marca' => $updatedProduct->getMarca(), 
-                    'prezzo' => $updatedProduct->getPrezzo()
+                    'nome' => $prodotto_aggiornato->getNome(), 
+                    'marca' => $prodotto_aggiornato->getMarca(), 
+                    'prezzo' => $prodotto_aggiornato->getPrezzo()
                 ]
             ];
-            $response = ['data' => $data];
+            $risposta_json = ['data' => $data];
             header("Location: /products/".$id);//reinderizza il client al seguente url ovvero alla tabella product , al prodotto con l'id specificato
             header('HTTP/1.1 200 OK');//200 ok 
             header('Content-Type: application/vnd.api+json');//content type json
-            echo json_encode($response, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
+            echo json_encode($risposta_json, JSON_PRETTY_PRINT);//si prepara la risposta assegnando alla chiave data , l'array data preparato precedentemente
         } else {
 
             http_response_code(404);//errore 404
@@ -163,8 +163,8 @@ addRoute('PATCH', '/products/(\d+)', function ($matches) { //funzione patch di m
 });
 
 addRoute('DELETE', '/products/(\d+)', function ($matches) { //funzione delete
-    $parts = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($parts); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
 
     if ($product) {//se il prodotto esiset
