@@ -65,8 +65,8 @@ addRoute('GET', '/products', function () {//metodo get senza id
 });
 
 addRoute('GET', '/products/(\d+)', function ($matches) {//funzione get con id
-    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array divisioni
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array divisioni che in questo caso è id
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
     header("Location: /products/" . $id); //reinderizza il client al seguente url ovvero alla tabella product , al prodotto con l'id specificato
     header('HTTP/1.1 200 OK');//risposta 200 ok
@@ -96,10 +96,10 @@ addRoute('GET', '/products/(\d+)', function ($matches) {//funzione get con id
 });
 
 addRoute('POST', '/products', function () { //chiamata post
-    $dati_json = json_decode(file_get_contents('php://input'), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array jsondata 
+    $dati_json = json_decode(file_get_contents('php://input'), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array datijson 
     if ($dati_json && isset($dati_json['data']['attributes'])) { //controlla se sono settati tutti i parametri
-        $attributi = $dati_json['data']['attributes']; //si assegna alla variabile attributes gli attributi di data e attributes
-        $nuovo_prodotto = Product::Create($attributi); //creazione nuovo prodotto con i parametri di attributes
+        $attributi = $dati_json['data']['attributes']; //si assegna alla variabile attributi gli attributi di data e attributes
+        $nuovo_prodotto = Product::Create($attributi); //creazione nuovo prodotto con i parametri della var attributi
         if ($nuovo_prodotto) { //se esiste preparo la risposta json
             $data = [
                 'data' => [
@@ -126,11 +126,11 @@ addRoute('POST', '/products', function () { //chiamata post
 });
 
 addRoute('PATCH', '/products/(\d+)', function ($matches) { //funzione patch di modifica
-    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
-    $dati_json = json_decode(file_get_contents("php://input"), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array patchdata 
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array divisioni
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array divisioni che in questo caso è id
+    $dati_json = json_decode(file_get_contents("php://input"), true); //prende il json inviato dal server , e converte la risposta in un array associativo (true) e lo isnerisce nell'array datijson 
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
-    try { //se esistono patch data e products , si la fa query di update e si prepara la risposta json
+    try { //se esistono array datijson e products , si la fa query di update e si prepara la risposta json
         if ($dati_json && $product) {
             $prodotto_aggiornato = $product->Update($dati_json["data"]["attributes"]);
             $data = [
@@ -163,8 +163,8 @@ addRoute('PATCH', '/products/(\d+)', function ($matches) { //funzione patch di m
 });
 
 addRoute('DELETE', '/products/(\d+)', function ($matches) { //funzione delete
-    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array parts
-    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array parts che in questo caso è id
+    $divisioni = explode('/', $matches);//spezza la stringa in base al "/" e inserisce i pezzi di stringa nell'array divisioni
+    $id = end($divisioni); //con la funzione end recupera l'ultimo elemento dell'array divisioni che in questo caso è id
     $product = Product::Find($id);//cerca il prodotto nella tabella in base a quell'id
 
     if ($product) {//se il prodotto esiset
